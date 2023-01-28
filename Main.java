@@ -1,133 +1,85 @@
 
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
     static Scanner scanner = new Scanner(System.in);
-    static int number;
-    static char action;
     static String result;
+    static String data[];
+    static char action;
 
-    public static void main(String[] args) throws Exception{
-        System.out.print("Введите стоку в ковычках а число без ковычек(выполняемые действия:сложение или вычетание строк,умножение и деление стоки на число: ");
-        String userInput = scanner.nextLine();
-        action = metodOperation(userInput);
-        globalWork(userInput);
+    static public void main(String[] args) throws Exception {
+        System.out.println("Введите строку в ковычках (\"\"), арифтетический знак(\"+-\") и вторую строку в ковычках или , строку , арифметический знак (\"*/\") и число без ковычек: ");
+        String example = scanner.nextLine();
+        action = operation(example);
+        result = answer(example);
+        result = proverka(example);
+        System.out.println(result);
     }
 
-    private static void globalWork(String userInput){
-        String[] example = userInput.split("[+-/*\"]");
-        if (example.length == 5) {
-            String st1 = example[1];
-            String st4 = example[4];
-            result = calculated(st1, st4, action);
-            if (result.length() > 40) {
-                String rez = result.substring(0, 40);
-                System.out.println(rez + "...");
-            } else {
-                System.out.println(result);
-            }
+    private static char operation(String example) throws Exception {
+        if (example.contains(" + ")) {
+            data = example.split(" \\+ ");
+            action = '+';
+        } else if (example.contains(" - ")) {
+            data = example.split(" - ");
+            action = '-';
+        } else if (example.contains(" * ")) {
+            data = example.split(" \\* ");
+            action = '*';
+        } else if (example.contains(" / ")) {
+            data = example.split(" / ");
+            action = '/';
         } else {
-            String st1 = example[1];
-            String st3 = example[3];
-            number = Integer.parseInt(st3);
-            number = Integer.parseInt(st3.replace(" ", ""));
-            result = calculated(st1, number, action);
-            if (result.length() > 40) {
-                String rez = result.substring(0, 40);
-                System.out.println(rez + "...");
-            } else {
-                System.out.println(result);
-            }
-
-        }
+            throw new Exception("Некорректный знак действия");
         }
 
-
-
-    private static char metodOperation(String userInput) {
-        char[] uchar = new char[26];
-        for (int i = 0; i < userInput.length(); i++) {
-            uchar[i] = userInput.charAt(i);
-            if (uchar[i] == '+') {
-                action = '+';
-            }
-            if (uchar[i] == '-') {
-                action = '-';
-            }
-            if (uchar[i] == '*') {
-                action = '*';
-            }
-            if (uchar[i] == '/') {
-                action = '/';
-            }
-        }
         return action;
     }
 
-    public static String calculated(String num1, String num2, char oper) {
-
-        switch (oper) {
-            case '+':
-                result = num1 + num2;
-                break;
-            case '-':
-                int resA = num1.length() - num2.length();
-                if (num1.length() == num2.length()) {
-                    result = "0";
+    private static String answer(String example) throws Exception {
+        if (action == '*' || action == '/') {
+            if (data[1].contains("\""))
+                throw new Exception("invalid int");
+        }
+            if (action == '-' || action == '+') {
+                if (data[0].contains("\"") && data[1].contains("\"")) {
                 } else {
-                    result = num1.substring(0, resA);
+                    throw new Exception("Invalid Input!");
                 }
-                break;
-            case '*':
-                System.out.println("Неверный знак операции * (введите + или -)");
-                break;
-            case '/':
-                System.out.println("Неверный знак операции / (введите + или -)");
-                break;
-            default:
-                throw new IllegalArgumentException("Не верный знак операции");
-        }
-        return result;
-    }
-
-    public static String calculated(String num1, int num, char oper) {
-
-        switch (oper) {
-            case '+':
-                System.out.println("Неверный знак операции + (введите * или /)");
-
-                break;
-            case '-':
-                System.out.println("Неверный знак операции - (введите * или /)");
-                break;
-            case '*':
+            }
+            for (int i = 0; i < data.length; i++) {
+                data[i] = data[i].replace("\"", "");
+            }
+            if (action == '*') {
+                int number = Integer.parseInt(data[1]);
                 result = "";
-                for (int u = 0; u < num; u++) {
-                    result +=  result + num1;
+                for (int i = 0; i < number; i++) {
+                    result += data[0];
                 }
-                break;
-            case '/':
-                try {
-                    int resB = num1.length() / num;
-                    if (num1.length() == num) {
-                        result = "1";
-                    } else {
-                        result = num1.substring(0, resB);
-                    }
-                } catch (ArithmeticException | InputMismatchException e) {
-                    System.out.println("Exception : " + e);
-                    System.out.println("Only integer non-zero parameters allowed");
-                    break;
-                } finally {
-                    if (num1.length() < num) {
-                        System.out.println("Делимое меньше делителя");
-                    }
+            }
+            if (action == '+') {
+                result = data[0] + data[1];
+            } else if (action == '-') {
+                int index = data[0].indexOf(data[1]);
+                if (index == -1) {
+                    result = data[0];
+                } else {
+                    result = data[0].substring(0, index);
+                    result += data[0].substring(index + data[1].length());
                 }
-                break;
-            default:
-                throw new IllegalArgumentException("Не верный знак операции");
+            }
+            if (action == '/') {
+                int newLength = data[0].length() / Integer.parseInt(data[1]);
+                result = data[0].substring(0, newLength);
+            }
+            return result;
         }
-        return result;
-    }
+
+        private static String proverka (String example){
+            if (result.length() > 40) {
+                result = result.substring(0, 40) + "...";
+            }
+            return result;
+        }
 }
+
